@@ -2,19 +2,16 @@ from flask import Flask, render_template, request
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 import pandas as pd
+import ssl
 
 app = Flask(__name__)
 
-# 네이버 영화 리뷰 데이터 불러오기
-# → 탭으로 구분된 파일이라 sep='\t' 써요
-# → 오류나는 행은 건너뛰어요
-df = pd.read_csv("ratings_train.txt", sep='\t', on_bad_lines='skip')
+ssl._create_default_https_context = ssl._create_unverified_context
 
-# 결측값 제거
-# → 비어있는 리뷰 제거해요
+url = "https://raw.githubusercontent.com/e9t/nsmc/master/ratings_train.txt"
+df = pd.read_csv(url, sep='\t', on_bad_lines='skip')
 df = df.dropna()
 
-# 모델 학습
 vectorizer = TfidfVectorizer(max_features=5000)
 X = vectorizer.fit_transform(df['document'])
 y = df['label']
